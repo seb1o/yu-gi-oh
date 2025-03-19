@@ -1,8 +1,10 @@
 import CardService from "./services/card-service.js";
+import StorageService from "./services/storage-service.js";
 
 const cardService = new CardService();
+const storageService = new StorageService();
 
-
+// Fetch and display the cards
 cardService.getCardsData().then(cards => displayCards(cards));
 
 function displayCards(cards) {
@@ -21,8 +23,27 @@ function displayCards(cards) {
         cardName.textContent = card.name;
         cardContainer.appendChild(cardName);
 
+        // Add a star/heart icon for preferred cards
+        const starIcon = document.createElement('span');
+        starIcon.classList.add('star-icon');
+        starIcon.textContent = storageService.isCardPreferred(card.id) ? '★' : '☆';
+        starIcon.onclick = (e) => {
+            e.stopPropagation();
+            toggleCardPreference(card);
+            displayCards(cards); // Refresh the card list to update the icon
+        };
+        cardContainer.appendChild(starIcon);
+
         container.appendChild(cardContainer);
     });
+}
+
+function toggleCardPreference(card) {
+    if (storageService.isCardPreferred(card.id)) {
+        storageService.remove(card.id);
+    } else {
+        storageService.save(card);
+    }
 }
 
 function openCardDetail(cardId) {
@@ -44,6 +65,12 @@ function filterSpellCards() {
         displayCards(filteredCards);
     });
 }
+
+function openPreferredPage() {
+    window.location.href = "preferred.html";
+}
+
+window.openPreferredPage = openPreferredPage;
 
 
 window.sortByName = sortByName;
